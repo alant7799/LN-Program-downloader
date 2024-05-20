@@ -1,0 +1,10 @@
+pandas
+pyspark
+bs4
+requests
+numpy
+selenium
+scikit-learn
+seaborn
+matplotlib
+pandas
