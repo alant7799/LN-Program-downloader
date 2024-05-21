@@ -7,6 +7,7 @@ from pyspark.sql import SparkSession
 from pyspark import SparkContext
 from datetime import datetime, date
 from pyspark.sql.functions import current_date,year
+
 sc=SparkContext.getOrCreate()
 spark = SparkSession.builder.appName("Pandas to Spark").getOrCreate()
 
@@ -14,7 +15,7 @@ local_url = "excel_files\Muestra Anual LN+.xlsx"
 
 processed_url = local_url.replace("\\","/")
 
-pd_df = pd.read_excel(io=processed_url, skiprows=1, usecols="A:C", )
+pd_df = pd.read_excel(io=processed_url, skiprows=1, usecols="A:C")
 
 spark_df = spark.createDataFrame(pd_df)
 
