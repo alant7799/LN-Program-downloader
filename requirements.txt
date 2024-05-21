@@ -1,5 +1,5 @@
 pandas
-pyspark
+pyspark == 3.4.3
 bs4
 requests
 numpy

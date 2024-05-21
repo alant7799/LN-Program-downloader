@@ -22,6 +22,11 @@ spark_df = spark.createDataFrame(pd_df)
 spark_df.printSchema()
 spark_df.show()
 
+df_table_view = spark_df.createOrReplaceTempView("links")
+
+df_select = spark.sql("SELECT * from links where Enlace != 'NaN'")
+df_select.show()
+
 
 
 # specify the URL of the archive here
