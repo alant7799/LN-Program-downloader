@@ -8,24 +8,26 @@ from pyspark import SparkContext
 from datetime import datetime, date
 from pyspark.sql.functions import current_date,year
 
-sc=SparkContext.getOrCreate()
-spark = SparkSession.builder.appName("Pandas to Spark").getOrCreate()
+def load():
 
-local_url = "excel_files\Muestra Anual LN+.xlsx"
+    sc = SparkContext.getOrCreate()
+    spark = SparkSession.builder.appName("Pandas to Spark").getOrCreate()
 
-processed_url = local_url.replace("\\","/")
+    local_url = "excel_files\Muestra Anual LN+.xlsx"
 
-pd_df = pd.read_excel(io=processed_url, skiprows=1, usecols="A:C")
+    processed_url = local_url.replace("\\","/")
 
-spark_df = spark.createDataFrame(pd_df)
+    pd_df = pd.read_excel(io=processed_url, skiprows=1, usecols="A:C")
 
-spark_df.printSchema()
-spark_df.show()
+    spark_df = spark.createDataFrame(pd_df)
 
-df_table_view = spark_df.createOrReplaceTempView("links")
+    spark_df.printSchema()
+    spark_df.show()
 
-df_select = spark.sql("SELECT * from links where Enlace != 'NaN'")
-df_select.show()
+    df_table_view = spark_df.createOrReplaceTempView("links")
+
+    df_select = spark.sql("SELECT * from links where Enlace != 'NaN'")
+    df_select.show()
 
 
 
@@ -40,3 +42,5 @@ with open('video.mp4', 'wb') as f_out:
         if chunk:
             f_out.write(chunk)
 """
+
+def main():
