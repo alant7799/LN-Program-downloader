@@ -25,11 +25,12 @@ spark_df = spark.createDataFrame(pd_df)
 
 df_table_view = spark_df.createOrReplaceTempView("links")
 
-#df_select = spark.sql("select * from links where Enlace != 'NaN'")
 df_select = spark.sql("SELECT regexp_replace(week, '[0-9]*[.] Semana del ', '') as week , program, link FROM links where link != 'NaN'")
 df_select.show()
 
 links_list = df_select.toPandas().values.tolist()
+
+file_names = []
 
 for row in links_list:
     week, program, link = row[0], row[1], row[2]
@@ -38,9 +39,11 @@ for row in links_list:
     week = week.replace(" de ", " ")
     print(week)
 
-    #program + 
+    program = program.replace('"', '')
+    print(program)
 
-
+    file_names.append(week + " " + program)
+print(file_names)
 # specify the URL of the archive here
 """"url = 'https://cdn.jwplayer.com/videos/k0LzXTYu-kTExGaWf.mp4'
 headers = {'resolution':'720','User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
