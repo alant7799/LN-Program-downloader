@@ -7,28 +7,38 @@ from pyspark.sql import SparkSession
 from pyspark import SparkContext
 from datetime import datetime, date
 from pyspark.sql.functions import current_date,year
+from pyspark.sql.functions import row_number
+from pyspark.sql.window import Window
 
-def load():
 
-    sc = SparkContext.getOrCreate()
-    spark = SparkSession.builder.appName("Pandas to Spark").getOrCreate()
 
-    local_url = "excel_files\Muestra Anual LN+.xlsx"
+sc = SparkContext.getOrCreate()
+spark = SparkSession.builder.appName("Pandas to Spark").getOrCreate()
 
-    processed_url = local_url.replace("\\","/")
+local_url = "excel_files\Muestra Anual LN+.xlsx"
+processed_url = local_url.replace("\\","/")
 
-    pd_df = pd.read_excel(io=processed_url, skiprows=1, usecols="A:C")
+pd_df = pd.read_excel(io=processed_url, skiprows=1, usecols="A:C")
+pd_df.columns = ["week","program","link"]
 
-    spark_df = spark.createDataFrame(pd_df)
+spark_df = spark.createDataFrame(pd_df)
 
-    spark_df.printSchema()
-    spark_df.show()
+df_table_view = spark_df.createOrReplaceTempView("links")
 
-    df_table_view = spark_df.createOrReplaceTempView("links")
+#df_select = spark.sql("select * from links where Enlace != 'NaN'")
+df_select = spark.sql("SELECT regexp_replace(week, '[0-9]*[.] Semana del ', '') as week , program, link FROM links where link != 'NaN'")
+df_select.show()
 
-    df_select = spark.sql("SELECT * from links where Enlace != 'NaN'")
-    df_select.show()
+links_list = df_select.toPandas().values.tolist()
 
+for row in links_list:
+    week, program, link = row[0], row[1], row[2]
+
+    week = week.replace(" al", " -")
+    week = week.replace(" de ", " ")
+    print(week)
+
+    #program + 
 
 
 # specify the URL of the archive here
@@ -42,5 +52,3 @@ with open('video.mp4', 'wb') as f_out:
         if chunk:
             f_out.write(chunk)
 """
-
-def main():
