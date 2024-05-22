@@ -5,11 +5,6 @@ import requests
 import pyspark
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
-from datetime import datetime, date
-from pyspark.sql.functions import current_date,year
-from pyspark.sql.functions import row_number
-from pyspark.sql.window import Window
-
 
 
 sc = SparkContext.getOrCreate()
@@ -30,7 +25,7 @@ df_select.show()
 
 links_list = df_select.toPandas().values.tolist()
 
-file_names = []
+file_name_and_links = []
 
 for row in links_list:
     week, program, link = row[0], row[1], row[2]
@@ -42,8 +37,8 @@ for row in links_list:
     program = program.replace('"', '')
     print(program)
 
-    file_names.append(week + " " + program)
-print(file_names)
+    file_name_and_links.append([week + " " + program, link])
+print(file_name_and_links)
 # specify the URL of the archive here
 """"url = 'https://cdn.jwplayer.com/videos/k0LzXTYu-kTExGaWf.mp4'
 headers = {'resolution':'720','User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
