@@ -21,32 +21,39 @@ spark_df = spark.createDataFrame(pd_df)
 df_table_view = spark_df.createOrReplaceTempView("links")
 
 df_select = spark.sql("SELECT regexp_replace(week, '[0-9]*[.] Semana del ', '') as week , program, link FROM links where link != 'NaN'")
-df_select.show()
 
 links_list = df_select.toPandas().values.tolist()
 
-file_name_and_links = []
+dict = {}
 
 for row in links_list:
     week, program, link = row[0], row[1], row[2]
 
     week = week.replace(" al", " -")
     week = week.replace(" de ", " ")
-    print(week)
 
     program = program.replace('"', '')
-    print(program)
 
-    file_name_and_links.append([week + " " + program, link])
-print(file_name_and_links)
-# specify the URL of the archive here
-""""url = 'https://cdn.jwplayer.com/videos/k0LzXTYu-kTExGaWf.mp4'
+    dict[week + " " + program] = link
+    print(dict)
+
 headers = {'resolution':'720','User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
-    
-with open('video.mp4', 'wb') as f_out:
-    r = requests.get(url, headers=headers, stream=True)
-    print(r)
-    for chunk in r.iter_content(chunk_size=1024*1024):
-        if chunk:
-            f_out.write(chunk)
-"""
+
+for key in dict.keys():
+
+    r = requests.get(dict[key], headers=headers, stream=True)
+
+    soup = BeautifulSoup(r.text, 'html.parser')
+
+    app_html = soup.find(type="application/ld+json")
+    app_json = (app_html.contents)[0]
+    json_for_mp4 = json.loads(app_json)
+
+    mp4_source_link = json_for_mp4['embedUrl']
+
+    with open(str(key) + ".mp4", 'wb') as f_out:
+        r = requests.get(mp4_source_link, headers=headers, stream=True)
+        print(r)
+        for chunk in r.iter_content(chunk_size=1024*1024):
+            if chunk:
+                f_out.write(chunk)
