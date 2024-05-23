@@ -79,7 +79,7 @@ def transform(links_list):
 """ recibe nombre a dar al archivo mp4 y link de source """
 def get_mp4_files(file_name, link, output_url):
 
-    headers = {'resolution':'720','User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
 
     with open(os.path.join(output_url, file_name + ".mp4"), "wb") as f_out:
         r = requests.get(link, headers=headers, stream=True)
