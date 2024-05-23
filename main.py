@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from bs4 import BeautifulSoup
 import json
@@ -5,7 +6,12 @@ import requests
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
 
-local_url = "excel_files\Muestra Anual LN+.xlsx"
+local_url = r"excel_files\Muestra Anual LN+.xlsx"
+output_url = r"C:\Users\Alan\Downloads"
+
+"""replaces backslash for forward slash"""
+def process_url(url):
+    return url.replace("\\","/")
 
 """recibe url de un archivo excel donde se consumen las 3 primeras columnas"""
 def extract(local_url):
@@ -13,7 +19,7 @@ def extract(local_url):
     sc = SparkContext.getOrCreate()
     spark = SparkSession.builder.appName("Pandas to Spark").getOrCreate()
 
-    processed_url = local_url.replace("\\","/")
+    processed_url = process_url(local_url)
 
     pd_df = pd.read_excel(io=processed_url, skiprows=1, usecols="A:C")
     pd_df.columns = ["week","program","link"]
@@ -71,11 +77,11 @@ def transform(links_list):
     return get_mp4_source_as_dict_values(dict)
 
 """ recibe nombre a dar al archivo mp4 y link de source """
-def get_mp4_files(file_name, link):
+def get_mp4_files(file_name, link, output_url):
 
     headers = {'resolution':'720','User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
 
-    with open(file_name + ".mp4", 'wb') as f_out:
+    with open(os.path.join(output_url, file_name + ".mp4"), "wb") as f_out:
         r = requests.get(link, headers=headers, stream=True)
         print(r)
         for chunk in r.iter_content(chunk_size=1024*1024):
@@ -83,19 +89,19 @@ def get_mp4_files(file_name, link):
                 f_out.write(chunk)
 
 """ recibe dict con claves nombre y semana programa, valor source mp4, los descarga"""
-def load(dict):
+def load(dict, output_url):
 
     for key in dict.keys():
 
-        get_mp4_files(key,dict[key])
+        get_mp4_files(key,dict[key], output_url)
 
 """ funcion principal, recibe url local de archivo excel a consumir"""
-def main(local_url):
+def main(local_url, output_url):
 
     rows_list = extract(local_url)
 
     programs_dict = transform(rows_list)
 
-    load(programs_dict)
+    load(programs_dict, output_url)
 
-main(local_url)
+main(local_url, output_url)
