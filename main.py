@@ -6,7 +6,7 @@ import requests
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
 
-local_url = r"excel_files\Muestra Anual LN+.xlsx"
+local_url = r"excel_files\Muestra Anual LN+.xlsx" #raw string to avoid unicode error
 output_url = r"C:\Users\Alan\Downloads"
 
 """replaces backslash for forward slash"""
@@ -59,9 +59,11 @@ def get_mp4_source_as_dict_values(dict):
 
         soup = BeautifulSoup(r.text, 'html.parser')
 
-        app_html = soup.find(type="application/ld+json")
-        app_json = (app_html.contents)[0]
-        json_for_mp4 = json.loads(app_json)
+        app_html = soup.find(id="scriptVideosJw")
+        app_html = app_html['data-playlist']
+        app_html = app_html[1:-1]
+        app_json = json.loads(app_html)
+        app_json = app_json["sources"]
 
         mp4_source_link = json_for_mp4['embedUrl']
 
