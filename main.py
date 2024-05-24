@@ -6,6 +6,8 @@ import requests
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
 
+
+resolution = '720p' #['AAC Audio','180p','270p','360p','540p','720p']
 local_url = r"excel_files\Muestra Anual LN+.xlsx" #raw string to avoid unicode error
 output_url = r"C:\Users\Alan\Downloads"
 
@@ -51,7 +53,7 @@ def clean_list(links_list):
     return dict
 
 """ recibe dict donde las claves son el nombre y semana del programa y el valor el link a la pagina"""
-def get_mp4_source_as_dict_values(dict):
+def get_mp4_source_as_dict_values(dict, resolution):
 
     for key in dict.keys():
 
@@ -59,24 +61,24 @@ def get_mp4_source_as_dict_values(dict):
 
         soup = BeautifulSoup(r.text, 'html.parser')
 
-        app_html = soup.find(id="scriptVideosJw")
-        app_html = app_html['data-playlist']
-        app_html = app_html[1:-1]
-        app_json = json.loads(app_html)
-        app_json = app_json["sources"]
+        app_script = soup.find(id="scriptVideosJw")
+        app_html = app_script['data-playlist']
+        app_html_dict = app_html[1:-1]
+        app_json = json.loads(app_html_dict)
+        app_json_sources = app_json["sources"]
 
-        mp4_source_link = json_for_mp4['embedUrl']
-
-        dict[key] = mp4_source_link
+        for source in app_json_sources:
+            if 'label' in source and source['label'] == resolution: 
+                dict[key] = source['file']
     
     return dict
 
 """ recibe una lista de listas [[week, program, link]...]"""
-def transform(links_list):
+def transform(links_list, resolution):
 
     dict = clean_list(links_list)
 
-    return get_mp4_source_as_dict_values(dict)
+    return get_mp4_source_as_dict_values(dict, resolution)
 
 """ recibe nombre a dar al archivo mp4 y link de source """
 def get_mp4_files(file_name, link, output_url):
@@ -98,12 +100,12 @@ def load(dict, output_url):
         get_mp4_files(key,dict[key], output_url)
 
 """ funcion principal, recibe url local de archivo excel a consumir"""
-def main(local_url, output_url):
+def main(local_url, output_url, resolution):
 
     rows_list = extract(local_url)
 
-    programs_dict = transform(rows_list)
+    programs_dict = transform(rows_list, resolution)
 
-    load(programs_dict, output_url)
+    load(programs_dict, output_url,)
 
-main(local_url, output_url)
+main(local_url, output_url, resolution)
