@@ -5,12 +5,15 @@ import json
 import requests
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
+import zipfile
+import glob
 
 
-resolution = '720p' #['AAC Audio','180p','270p','360p','540p','720p']
+resolution = '720p' #['180p','270p','360p','540p','720p']
 local_url = r"excel_files\Muestra Anual LN+ (1).xlsx" #raw string to avoid unicode error
 output_url = r"C:\Users\Alan\Downloads"
 folder_name = "LN+ videos"
+to_zip = "True"
 
 """replaces backslash for forward slash"""
 def process_url(url):
@@ -98,12 +101,23 @@ def create_forder(location, name):
     directory = process_url(location + '\\' + name)
     os.mkdir(directory)
 
+""""send folder to zipfile"""
+def send_to_zip(source_location, output_location):
+    with zipfile.ZipFile(output_location, 'w') as f:
+        for file in glob.glob(source_location + '/*'):
+            f.write(file)
+
 """ recibe dict con claves nombre y semana programa, valor source mp4, los descarga"""
 def load(dict, output_url, folder_name):
+
+    create_forder(output_url, folder_name)
 
     for key in dict.keys():
 
         get_mp4_files(key,dict[key], output_url, folder_name)
+    
+    print("source:" + output_url + folder_name + "\n" + "output:" + output_url + ".zip")
+    send_to_zip(output_url + "\\" + folder_name, output_url + "\\" + folder_name + ".zip")
 
 """ funcion principal, recibe url local de archivo excel a consumir"""
 def main(local_url, output_url, resolution, folder_name):
@@ -113,5 +127,7 @@ def main(local_url, output_url, resolution, folder_name):
     programs_dict = transform(rows_list, resolution)
 
     load(programs_dict, output_url, folder_name)
+
+    print("Success")
 
 main(local_url, output_url, resolution, folder_name)
