@@ -5,7 +5,6 @@ import json
 import requests
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
-import zipfile
 
 local_url = r"excel_files\Muestra Anual LN+ (1).xlsx"
 output_url = r"C:\Users\Alan\Downloads"
