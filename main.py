@@ -8,8 +8,9 @@ from pyspark import SparkContext
 
 
 resolution = '720p' #['AAC Audio','180p','270p','360p','540p','720p']
-local_url = r"excel_files\Muestra Anual LN+.xlsx" #raw string to avoid unicode error
+local_url = r"excel_files\Muestra Anual LN+ (1).xlsx" #raw string to avoid unicode error
 output_url = r"C:\Users\Alan\Downloads"
+folder_name = "LN+ videos"
 
 """replaces backslash for forward slash"""
 def process_url(url):
@@ -81,31 +82,36 @@ def transform(links_list, resolution):
     return get_mp4_source_as_dict_values(dict, resolution)
 
 """ recibe nombre a dar al archivo mp4 y link de source """
-def get_mp4_files(file_name, link, output_url):
+def get_mp4_files(file_name, link, output_url, folder_name):
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
 
-    with open(os.path.join(output_url, file_name + ".mp4"), "wb") as f_out:
+    with open(os.path.join(output_url,folder_name, file_name + ".mp4"), "wb") as f_out:
         r = requests.get(link, headers=headers, stream=True)
         print(r)
         for chunk in r.iter_content(chunk_size=1024*1024):
             if chunk:
                 f_out.write(chunk)
 
+"""creates folder to custom route"""
+def create_forder(location, name):
+    directory = process_url(location + '\\' + name)
+    os.mkdir(directory)
+
 """ recibe dict con claves nombre y semana programa, valor source mp4, los descarga"""
-def load(dict, output_url):
+def load(dict, output_url, folder_name):
 
     for key in dict.keys():
 
-        get_mp4_files(key,dict[key], output_url)
+        get_mp4_files(key,dict[key], output_url, folder_name)
 
 """ funcion principal, recibe url local de archivo excel a consumir"""
-def main(local_url, output_url, resolution):
+def main(local_url, output_url, resolution, folder_name):
 
     rows_list = extract(local_url)
 
     programs_dict = transform(rows_list, resolution)
 
-    load(programs_dict, output_url,)
+    load(programs_dict, output_url, folder_name)
 
-main(local_url, output_url, resolution)
+main(local_url, output_url, resolution, folder_name)

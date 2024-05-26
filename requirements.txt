@@ -10,4 +10,3 @@ matplotlib
 pandas
 openpyxl
 setuptools
-findspark
