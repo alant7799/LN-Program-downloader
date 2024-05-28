@@ -89,7 +89,9 @@ def get_mp4_files(file_name, link, output_url, folder_name):
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
 
-    with open(os.path.join(output_url,folder_name, file_name + ".mp4"), "wb") as f_out:
+    create_forder("", "video_buffer")
+
+    with open(os.path.join("video_buffer", file_name + ".mp4"), "wb") as f_out:
         r = requests.get(link, headers=headers, stream=True)
         print(r)
         for chunk in r.iter_content(chunk_size=1024*1024):
@@ -99,7 +101,8 @@ def get_mp4_files(file_name, link, output_url, folder_name):
 """creates folder to custom route"""
 def create_forder(location, name):
     directory = process_url(location + '\\' + name)
-    os.mkdir(directory)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 """"send folder to zipfile"""
 def send_to_zip(source_location, output_location):
