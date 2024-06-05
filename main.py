@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 from pyspark import SparkContext
 
 
-resolution = '720p' #['AAC Audio','180p','270p','360p','540p','720p']
+resolution = '540p' #['AAC Audio','180p','270p','360p','540p','720p']
 local_url = r"excel_files\Muestra Anual LN+ (1).xlsx" #raw string to avoid unicode error
 output_url = r"C:\Users\Alan\Downloads"
 folder_name = "LN+ videos"
@@ -88,15 +88,17 @@ def get_mp4_files(file_name, link, output_url, folder_name):
 
     with open(os.path.join(output_url,folder_name, file_name + ".mp4"), "wb") as f_out:
         r = requests.get(link, headers=headers, stream=True)
-        print(r)
+        print(file_name + " Response value: "  + str(r))
         for chunk in r.iter_content(chunk_size=1024*1024):
             if chunk:
                 f_out.write(chunk)
 
 """creates folder to custom route"""
-def create_forder(location, name):
+def create_folder(location, name):
+
     directory = process_url(location + '\\' + name)
-    os.mkdir(directory)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 """ recibe dict con claves nombre y semana programa, valor source mp4, los descarga"""
 def load(dict, output_url, folder_name):
@@ -107,6 +109,8 @@ def load(dict, output_url, folder_name):
 
 """ funcion principal, recibe url local de archivo excel a consumir"""
 def main(local_url, output_url, resolution, folder_name):
+
+    create_folder(output_url, folder_name)
 
     rows_list = extract(local_url)
 
